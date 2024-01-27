@@ -1,7 +1,6 @@
 package container
 
 import (
-	"flag"
 	"os"
 	"os/exec"
 	"syscall"
@@ -9,24 +8,9 @@ import (
 
 const SUB_PROCESS = "tiny-container"
 
-var (
-	HOSTNAME string
-	COMMAND  string
-)
-
-func init() {
-	flag.StringVar(&HOSTNAME, "hostname", "tiny-container", "")
-	flag.StringVar(&COMMAND, "exec", "/bin/sh", "")
-
-	if os.Args[0] == SUB_PROCESS {
-		if err := Init(); err != nil {
-			panic(err)
-		}
-		if err := Exec(COMMAND); err != nil {
-			panic(err)
-		}
-		os.Exit(0)
-	}
+type Container struct {
+	HostName string
+	Command  string
 }
 
 func Start() error {
@@ -47,21 +31,21 @@ func Start() error {
 	return cmd.Run()
 }
 
-func Init() error {
-	if err := syscall.Sethostname([]byte(HOSTNAME)); err != nil {
+func (c *Container) Init() error {
+	if err := syscall.Sethostname([]byte(c.HostName)); err != nil {
 		return err
 	}
 	return nil
 }
 
-func Exec(command string) error {
-	cmd := exec.Command(command)
+func (c *Container) Exec() error {
+	cmd := exec.Command(c.Command)
 
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	cmd.Env = []string{"PS1=-[" + HOSTNAME + "]- # "}
+	cmd.Env = []string{"PS1=-[" + c.HostName + "]- # "}
 
 	return cmd.Run()
 }
