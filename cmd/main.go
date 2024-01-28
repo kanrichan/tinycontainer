@@ -8,15 +8,18 @@ import (
 )
 
 var (
+	ROOT     string
 	HOSTNAME string
 	COMMAND  string
 )
 
 func init() {
+	flag.StringVar(&ROOT, "root", "/tmp/tiny-container", "")
 	flag.StringVar(&HOSTNAME, "hostname", "tiny-container", "")
 	flag.StringVar(&COMMAND, "exec", "/bin/sh", "")
 
 	c := container.Container{
+		Root:     ROOT,
 		HostName: HOSTNAME,
 		Command:  COMMAND,
 	}
